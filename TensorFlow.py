@@ -30,9 +30,6 @@ import matplotlib.pyplot as plt
 import matplotlib.image as img
 import matplotlib.pyplot as pp
 
-
-
-
 # 머신러닝 라이브러
 import tensorflow as tf
 import tensorflow_datasets as tfds
@@ -74,20 +71,78 @@ print(image_count)
 
 roses = list(data_dir.glob('roses/*'))
 
+# 이미지 객체 출력
 print(PIL.Image.open(str(roses[0])))
+
+## 이미지 크기 출력
 print(PIL.Image.open(str(roses[0])).size)
+
+## 이미지 확장자 출력
 print(PIL.Image.open(str(roses[0])).format)
 
 # 이미지 확인하기
 PIL.Image.open(str(roses[0])).show()
 
-# ndarray = img.imread()
-# pp.imshow()
-# pp.show()
+
+#-----------------------------------------------------------------------------------#
+## 데이터세트 만들기
+## 로더를 위해 일부 매개변수를 정합니다.
+batch_size = 32
+img_height = 180
+img_width = 180
+#-----------------------------------------------------------------------------------#
 
 
+"""
+    모델을 개발할 때 검증 분할을 사용하는 것이 좋습니다. 훈련에 이미지의 80%를 사용하고 검증에 20%를 사용합니다.
+"""
+#-----------------------------------------------------------------------------------#
+## 훈련 데이터
+train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  ## 데이터 디렉토리
+  data_dir, 
+  ## 0과 1 사이의 선택적 부동액, 유효성 확인을 위해 예약할 데이터의 일부입니다.
+  validation_split=0.2,
+  ## 트레이닝
+  subset="training",
+  ## 섞기 및 변환을 위한 선택적 랜덤 시드입니다.
+  seed=123,
+  ## 이미지 사이즈
+  image_size=(img_height, img_width),
+  ## 데이터를 묶는 사이즈
+  batch_size=batch_size)
+#-----------------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------------#
+## 검증 데이터
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2,
+  subset="validation",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+#-----------------------------------------------------------------------------------#
+
+"""
+    이러한 데이터세트의 class_names 속성에서 클래스 이름을 찾을 수 있습니다.
+"""
+#-----------------------------------------------------------------------------------#
+class_names = train_ds.class_names
+print(class_names)
+#-----------------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------------#
+## 데이터 시각화 하기
+plt.figure(figsize=(10, 10))
 
 
+for images, labels in train_ds.take(1):
+  for i in range(9):
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(images[i].numpy().astype("uint8"))
+    plt.title(class_names[labels[i]])
+    plt.axis("off")
 
 
 
